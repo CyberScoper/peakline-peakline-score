@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ T.pls_page_title }}</title>
+    <link rel="icon" href="/static/images/favicon.ico" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/dashboard.css?v=1.3">
+    <style>
+        .pls-hero {
+            background: linear-gradient(135deg, var(--strava-orange) 0%, #ff6b35 100%);
+            color: white;
+            text-align: center;
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        /* Стили для темы pro */
+        html.pro .pls-hero {
+            background: linear-gradient(135deg, #10b981 0%, #0e9d72 100%);
+        }
+        
+        .pls-hero h1 {
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0 0 var(--spacing-md) 0;
+        }
+        
+        .pls-score-display {
+            font-size: 64px;
+            font-weight: 900;
+            line-height: 1;
+            margin: var(--spacing-md) 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .pls-level {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+            opacity: 0.9;
+        }
+        
+        .pls-description {
+            font-size: 16px;
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+        
+        .pls-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .pls-stat-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        
+        .pls-stat-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .pls-stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--strava-orange);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        /* Обновляем цвет для темы pro */
+        html.pro .pls-stat-value {
+            color: #10b981;
+        }
+        
+        .pls-stat-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .top-scores-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: var(--spacing-md);
+        }
+        
+        .top-scores-table th,
+        .top-scores-table td {
+            padding: var(--spacing-md);
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .top-scores-table th {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .top-scores-table td {
+            font-size: 15px;
+        }
+        
+        .activity-link {
+            color: var(--link-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .activity-link:hover {
+            text-decoration: underline;
+        }
+        
+        .score-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .score-elite { background: #10b981; }
+        .score-excellent { background: #3b82f6; }
+        .score-very-good { background: #8b5cf6; }
+        .score-good { background: #f59e0b; }
+        .score-average { background: #6b7280; }
+        .score-fair { background: #ef4444; }
+        .score-needs-improvement { background: #dc2626; }
+        
+        .terrain-icon {
+            font-size: 18px;
+            margin-right: 5px;
+        }
+        
+        .improvement-tip {
+            background: linear-gradient(135deg, var(--hover-bg-color) 0%, var(--card-bg) 100%);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            border-left: 4px solid var(--strava-orange);
+        }
+        
+        /* Обновляем цвет для темы pro */
+        html.pro .improvement-tip {
+            border-left-color: #10b981;
+        }
+        
+        .improvement-tip h3 {
+            color: var(--strava-orange);
+            margin-bottom: var(--spacing-md);
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        /* Обновляем цвет для темы pro */
+        html.pro .improvement-tip h3 {
+            color: #10b981;
+        }
+        
+        .improvement-tip ul {
+            margin: var(--spacing-md) 0 0 0;
+            padding-left: 20px;
+        }
+        
+        .improvement-tip li {
+            margin-bottom: var(--spacing-sm);
+            color: var(--text-secondary);
+        }
+        
+        .error-message {
+            text-align: center;
+            padding: var(--spacing-xl);
+        }
+        
+        .error-message h2 {
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .error-message p {
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        @media (max-width: 768px) {
+            .pls-score-display {
+                font-size: 48px;
+            }
+            
+            .pls-stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .top-scores-table {
+                font-size: 14px;
+            }
+            
+            .top-scores-table th,
+            .top-scores-table td {
+                padding: var(--spacing-sm);
+            }
+        }
+        .lang-switcher-dropdown { position: relative; }
+        .lang-switcher-btn { display: flex; align-items: center; gap: 8px; background-color: transparent; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md); cursor: pointer; color: var(--text-secondary); font-weight: 500; transition: all .2s; }
+        .lang-switcher-btn:hover { border-color: var(--text-primary); color: var(--text-primary); }
+        .lang-switcher-menu { position: absolute; top: calc(100% + 5px); right: 0; background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: 0 4px 15px var(--shadow-color); padding: 5px; min-width: 150px; z-index: 101; display: none; opacity: 0; transform: translateY(10px); transition: opacity .2s, transform .2s; }
+        .lang-switcher-dropdown.active .lang-switcher-menu { display: block; opacity: 1; transform: translateY(0); }
+        .lang-switcher-item { display: block; padding: 8px 12px; color: var(--text-primary); text-decoration: none; border-radius: 8px; font-size: 14px; }
+        .lang-switcher-item:hover { background-color: var(--border-color); }
+        
+        .page-footer { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 30px 5%; font-size: 14px; color: var(--text-secondary); 
+            border-top: 1px solid var(--border-color);
+            background: var(--card-bg);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        }
+        .page-footer nav a { color: var(--text-secondary); text-decoration: none; margin: 0 10px; }
+        .page-footer nav a:hover { text-decoration: underline; }
+        .footer-strava-logo { --logo-height: 30px; height: var(--logo-height); }
+        .footer-strava-logo .logo-light, html.dark .footer-strava-logo .logo-dark { display: inline-block; height: 70%; }
+        .footer-strava-logo .logo-dark, html.dark .footer-strava-logo .logo-light { display: none; }
+        
+        /* Стили для иконок переключения темы */
+        .sun-icon { display: none; }
+        .moon-icon { display: none; }
+        .pro-icon { display: none; }
+        html.light .sun-icon { display: block; }
+        html.dark .moon-icon { display: block; }
+        html.pro .pro-icon { display: block; }
+    </style>
+</head>
+<body>
+    <header class="page-header">
+        <div class="container header-container">
+            <a href="/" class="logo">
+                <img src="/static/images/logo-peakline-icon.png" alt="Peakline Logo">
+                <span>Peakline</span>
+            </a>
+            <div class="controls">
+                <button id="theme-toggle" class="control-btn" title="Toggle Theme">
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    <svg class="pro-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                </button>
+                <div class="lang-switcher-dropdown">
+                    <button class="lang-switcher-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                        <span>{{ lang | upper }}</span>
+                    </button>
+                    <div class="lang-switcher-menu">
+                        {% for code, name in T.available_languages.items() %}
+                            {% if code != lang %}
+                                <a href="?lang={{ code }}" class="lang-switcher-item">{{ name }}</a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <a href="/dashboard" class="btn btn-primary header-cta">{{ T.pls_quick_links_dashboard }}</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <main class="dashboard-main">
+            {% if error %}
+                <div class="card">
+                    <div class="error-message">
+                        <h2>{{ T.pls_error_title }}</h2>
+                        <p>{{ error }}</p>
+                        <a href="/dashboard" class="btn">{{ T.pls_error_back }}</a>
+                    </div>
+                </div>
+            {% elif not pls_data %}
+                <div class="card">
+                    <div class="error-message">
+                        <h2>{{ T.pls_no_data_title }}</h2>
+                        <p>{{ T.pls_no_data_text }}</p>
+                        <a href="/dashboard" class="btn">{{ T.pls_error_back }}</a>
+                    </div>
+                </div>
+            {% else %}
+                <!-- Основной блок с общим PLS -->
+                <div class="pls-hero">
+                    <h1>🏆 {{ T.pls_header_title }}</h1>
+                    <div class="pls-score-display">{{ pls_data.overall_pls_score }}</div>
+                    <div class="pls-level">{{ pls_data.performance_level }}</div>
+                    <div class="pls-description">
+                        {{ T.pls_performance_label.replace('{count}', pls_data.total_activities_analyzed|string) }}
+                    </div>
+                </div>
+                
+                <!-- Статистика -->
+                <div class="pls-stats-grid">
+                    <div class="pls-stat-card">
+                        <div class="pls-stat-value">{{ pls_data.top_scores|length }}</div>
+                        <div class="pls-stat-label">{{ T.pls_score_label }}</div>
+                    </div>
+                    <div class="pls-stat-card">
+                        <div class="pls-stat-value">{{ pls_data.total_activities_analyzed }}</div>
+                        <div class="pls-stat-label">{{ T.pls_total_analyzed_label }}</div>
+                    </div>
+                    <div class="pls-stat-card">
+                        <div class="pls-stat-value">
+                            {% if pls_data.top_scores %}
+                                {{ pls_data.top_scores[0].pls_points }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                        <div class="pls-stat-label">{{ T.pls_best_result_label }}</div>
+                    </div>
+                </div>
+                
+                <!-- Топ результаты -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>{{ T.pls_best_results_title }}</h2>
+                    </div>
+                    <p>{{ T.pls_best_results_desc }}</p>
+                    
+                    <table class="top-scores-table">
+                        <thead>
+                            <tr>
+                                <th>{{ T.pls_table_activity }}</th>
+                                <th>{{ T.pls_table_date }}</th>
+                                <th>{{ T.pls_table_terrain }}</th>
+                                <th>{{ T.pls_table_points }}</th>
+                                <th>{{ T.pls_table_level }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for score in pls_data.top_scores %}
+                            <tr>
+                                <td>
+                                    <a href="/activity/{{ score.activity_id }}" class="activity-link">
+                                        {{ score.activity_name }}
+                                    </a>
+                                </td>
+                                <td>{{ score.date[:10] if score.date else '-' }}</td>
+                                <td>
+                                    {% if score.terrain_type == 'flat' %}
+                                        <span class="terrain-icon">🏞️</span>{{ T.pls_terrain_flat }}
+                                    {% elif score.terrain_type == 'rolling' %}
+                                        <span class="terrain-icon">🌊</span>{{ T.pls_terrain_rolling }}
+                                    {% elif score.terrain_type == 'hilly' %}
+                                        <span class="terrain-icon">⛰️</span>{{ T.pls_terrain_hilly }}
+                                    {% elif score.terrain_type == 'mountain' %}
+                                        <span class="terrain-icon">🏔️</span>{{ T.pls_terrain_mountain }}
+                                    {% else %}
+                                        <span class="terrain-icon">🗺️</span>{{ score.terrain_type }}
+                                    {% endif %}
+                                </td>
+                                <td><strong>{{ score.pls_points }}</strong></td>
+                                <td>
+                                    {% set level_class = 'score-' + score.performance_level.lower().replace(' ', '-') %}
+                                    <span class="score-badge {{ level_class }}">
+                                        {{ score.performance_level }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Рекомендации по улучшению -->
+                <div class="card">
+                    <div class="improvement-tip">
+                        <h3>{{ T.pls_recommendations_title }}</h3>
+                        <p>{{ pls_data.improvement_potential }}</p>
+                        
+                        {% if pls_data.overall_pls_score < 600 %}
+                        <p><strong>{{ T.pls_recommendations_tips_title }}</strong></p>
+                        <ul>
+                            <li>{{ T.pls_recommendations_tip1 }}</li>
+                            <li>{{ T.pls_recommendations_tip2 }}</li>
+                            <li>{{ T.pls_recommendations_tip3 }}</li>
+                            <li>{{ T.pls_recommendations_tip4 }}</li>
+                        </ul>
+                        {% elif pls_data.overall_pls_score < 800 %}
+                        <p><strong>{{ T.pls_recommendations_excellent_title }}</strong></p>
+                        <ul>
+                            <li>{{ T.pls_recommendations_excellent_tip1 }}</li>
+                            <li>{{ T.pls_recommendations_excellent_tip2 }}</li>
+                            <li>{{ T.pls_recommendations_excellent_tip3 }}</li>
+                        </ul>
+                        {% else %}
+                        <p><strong>{{ T.pls_recommendations_great_job }}</strong></p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </main>
+
+        <aside class="dashboard-sidebar">
+            <!-- Описание методики -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>{{ T.pls_how_it_works_title }}</h2>
+                </div>
+                <p>{{ T.pls_how_it_works_desc }}</p>
+                <ul class="stat-list">
+                    <li>
+                        <span class="label">{{ T.pls_how_it_works_route }}</span>
+                        <span class="value">{{ T.pls_how_it_works_route_value }}</span>
+                    </li>
+                    <li>
+                        <span class="label">{{ T.pls_how_it_works_ideal_time }}</span>
+                        <span class="value">{{ T.pls_how_it_works_ideal_time_value }}</span>
+                    </li>
+                    <li>
+                        <span class="label">{{ T.pls_how_it_works_comparison }}</span>
+                        <span class="value">{{ T.pls_how_it_works_comparison_value }}</span>
+                    </li>
+                    <li>
+                        <span class="label">{{ T.pls_how_it_works_points }}</span>
+                        <span class="value">{{ T.pls_how_it_works_points_value }}</span>
+                    </li>
+                </ul>
+                <p style="font-size: 14px; color: var(--text-secondary); margin-top: var(--spacing-md);">
+                    {{ T.pls_how_it_works_avg }}
+                </p>
+            </div>
+
+            <!-- Быстрые ссылки -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>{{ T.pls_quick_links_title }}</h2>
+                </div>
+                <ul class="data-list">
+                    <li>
+                        <a href="/dashboard" class="list-item list-item-link">
+                            <div class="list-item-main">
+                                <div class="icon">🏠</div>
+                                <span class="name">{{ T.pls_quick_links_dashboard }}</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/activities" class="list-item list-item-link">
+                            <div class="list-item-main">
+                                <div class="icon">📊</div>
+                                <span class="name">{{ T.pls_quick_links_activities }}</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/settings" class="list-item list-item-link">
+                            <div class="list-item-main">
+                                <div class="icon">⚙️</div>
+                                <span class="name">{{ T.pls_quick_links_settings }}</span>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+
+    <footer class="page-footer">
+        <p>{{ T.footer_copyright }}</p>
+        <nav>
+            <a href="/about">{{ T.footer_about }}</a>
+            <a href="/privacy">{{ T.footer_privacy }}</a>
+            <a href="/support">{{ T.footer_support }}</a>
+        </nav>
+        <div class="footer-strava-logo">
+            <img src="/static/images/api_logo_pwrdBy_strava_horiz_orange.png" alt="{{ T.strava_powered_by_alt }}" class="logo-light">
+            <img src="/static/images/api_logo_pwrdBy_strava_horiz_white.png" alt="{{ T.strava_powered_by_alt }}" class="logo-dark">
+        </div>
+    </footer>
+
+    <script>
+        // Переключение темы
+        const themes = ['light', 'dark', 'pro'];
+        let currentThemeIndex = 0;
+
+        function updateThemeToggleIcons(theme) {
+            const sunIcon = document.querySelector('#theme-toggle .sun-icon');
+            const moonIcon = document.querySelector('#theme-toggle .moon-icon');
+            const proIcon = document.querySelector('#theme-toggle .pro-icon');
+            
+            if (sunIcon) sunIcon.style.display = theme === 'light' ? 'block' : 'none';
+            if (moonIcon) moonIcon.style.display = theme === 'dark' ? 'block' : 'none';
+            if (proIcon) proIcon.style.display = theme === 'pro' ? 'block' : 'none';
+        }
+
+        function applyTheme(theme) {
+            document.documentElement.classList.remove(...themes);
+            if (theme !== 'light') {
+                document.documentElement.classList.add(theme);
+            }
+            localStorage.setItem("theme", theme);
+            currentThemeIndex = themes.indexOf(theme);
+            updateThemeToggleIcons(theme);
+        }
+
+        // Применяем сохраненную тему при загрузке
+        const savedTheme = localStorage.getItem("theme");
+        if (savedTheme && themes.includes(savedTheme)) {
+            applyTheme(savedTheme);
+        } else {
+            applyTheme('light');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggle = document.getElementById("theme-toggle");
+            if (themeToggle) {
+                themeToggle.addEventListener("click", () => {
+                    currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+                    applyTheme(themes[currentThemeIndex]);
+                });
+            }
+
+            const langSwitcher = document.querySelector('.lang-switcher-dropdown');
+            if (langSwitcher) {
+                const btn = langSwitcher.querySelector('.lang-switcher-btn');
+                
+                btn.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    langSwitcher.classList.toggle('active');
+                });
+                
+                document.addEventListener('click', () => {
+                    if (langSwitcher.classList.contains('active')) {
+                        langSwitcher.classList.remove('active');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html> 
